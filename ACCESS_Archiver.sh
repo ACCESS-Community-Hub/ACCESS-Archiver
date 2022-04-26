@@ -6,7 +6,7 @@ set -a
 #
 # This is the ACCESS Archiver, v1.1
 # 21/01/2022
-# 
+#
 # Developed by Chloe Mackallah, CSIRO Aspendale
 #
 #########################
@@ -60,7 +60,7 @@ if [[ $access_version == *chem ]]; then
 fi
 #
 #########################
-# PRINT DETAILS TO SCREEN 
+# PRINT DETAILS TO SCREEN
 
 echo -e "\n==== ACCESS_Archiver ===="
 echo "here: $here"
@@ -82,7 +82,18 @@ else
   ./subroutines/find_files.sh
 fi
 
-#exit
+if [[ -n $first_year || -n $last_year ]]; then
+  first_year=${first_year:-1}
+  last_year=${last_year:-9999}
+  echo "Archiving restricted to years" $first_year ":" $last_year
+  for file in $here/tmp/$loc_exp/*csv; do
+    python3 $here/subroutines/restrict_years.py $first_year $last_year $file
+    if [[ $? != 0 ]]; then
+      echo "Error subsetting csv file"
+      exit 1
+    fi
+  done
+fi
 
 echo -e "\n---- Setting up jobs ----"
 
@@ -104,7 +115,7 @@ module use ~access/modules
 module load cdo
 module load nco
 module load pythonlib/um2netcdf4/2.0
-set -a 
+set -a
 ncpus=\$PBS_NCPUS
 here=$here
 base_dir=$base_dir
@@ -155,7 +166,7 @@ module use ~access/modules
 module load cdo
 module load nco
 module load conda/analysis3
-set -a 
+set -a
 here=$here
 base_dir=$base_dir
 arch_dir=$arch_dir
