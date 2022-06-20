@@ -38,7 +38,7 @@ def get_payu_year(file,payu_info):
         for row in payu_reader:
             if file.find(row[0]) != -1:
                 payu_yr=row[2]
-    try: 
+    try:
         payu_yr
         return payu_yr
     except: sys.exit('cannot determine payu year!')
@@ -46,13 +46,13 @@ def get_payu_year(file,payu_info):
 def do_plev8(outname):
     if (outname.find('.pe') != -1) or (outname.find('.pd') != -1):
         nc=nc4.Dataset(outname)
-        try: 
+        try:
             ncplev=nc.variables['pressure']
             if ncplev.shape[0] == 19:
                 print('attempting plev8 conversion')
                 [dirname,basename]=os.path.split(outname)
                 os.makedirs(dirname+'/plev19_daily',exist_ok=True)
-                os.chown(dirname+'/plev19_daily',os.stat(dirname+'/plev19_daily').st_uid,arch_grp)
+                chutil.chown(dirname+'/plev19_daily',group=arch_grp)
                 plev19file=dirname+'/plev19_daily/'+basename
                 plev8file=outname+'_plev8'
                 os.rename(outname,plev19file)
@@ -64,7 +64,7 @@ def do_plev8(outname):
                     output = sp.run(['ncks','-d','pressure,0','-d','pressure,2','-d','pressure,3','-d',\
                         'pressure,5','-d','pressure,8','-d','pressure,11','-d','pressure,13','-d',\
                         'pressure,16',plev19file,plev8file],capture_output=True,text=True)
-                else: 
+                else:
                     print('pressure information not recognised, moving original file back')
                     os.rename(plev19file,outname)
                     return
@@ -76,7 +76,7 @@ def do_plev8(outname):
                     os.replace(plev8file,outname)
                     print('converted to plev8')
                     return
-            else: 
+            else:
                 print('plev19 not found')
                 return
         except:
@@ -114,7 +114,8 @@ def check_um2nc(file,freq):
                 os.replace(outname+'_tmp',outname)
                 if plev8: do_plev8(outname)
                 os.chmod(outname,0o644)
-            else: 
+                shutil.chown(outname,group=arch_grp)
+            else:
                 print(basename+': file already exists')
             sys.stdout.flush()
         elif (not ncexists) and (not os.path.exists(file.replace('.nc',''))):
@@ -128,16 +129,17 @@ def check_um2nc(file,freq):
                 os.replace(outname+'_tmp',outname)
                 if plev8: do_plev8(outname)
                 os.chmod(outname,0o644)
-            else: 
+                shutil.chown(outname,group=arch_grp)
+            else:
                 print(basename+': file already exists')
-            sys.stdout.flush()   
+            sys.stdout.flush()
     else:
         if os.path.exists(file+'.nc') and ncexists:
             print(basename, 'nc file exists, skipping')
             sys.stdout.flush()
         else:
             print(basename, 'needs converting, um2ncing')
-            if zonal: 
+            if zonal:
                 #do_um2nc_zonal(file,freq)
                 if access_version.find('chem') != -1:
                     if freq == 'dai': do_um2nc_zonal(file,freq)
@@ -146,7 +148,7 @@ def check_um2nc(file,freq):
                     if freq == 'dai': do_um2nc_zonal(file,freq)
                     else: do_um2nc(file,freq)
             else: do_um2nc(file,freq)
-    
+
 def do_um2nc(file,freq):
     basename=os.path.basename(file)
     if access_version.find('payu') != -1:
@@ -176,36 +178,36 @@ def do_um2nc(file,freq):
         print(outname)
         if access_version.find('esm') != -1:
             lbvc9=fix_esm_lbvc9(file,outname)
-            if lbvc9: 
+            if lbvc9:
                 try: um2netcdf4.process(outname.replace('.nc','')+'_lbvc9-fixed',outname+'_tmp',args)
-                except Exception as e: 
+                except Exception as e:
                     print('um2nc conversion failed: {}'.format(e))
                     os.remove(outname+'_tmp')
                     return
                 os.remove(outname.replace('.nc','')+'_lbvc9-fixed')
-            else: 
+            else:
                 try: um2netcdf4.process(file,outname+'_tmp',args)
-                except Exception as e: 
+                except Exception as e:
                     print('um2nc conversion failed: {}'.format(e))
                     os.remove(outname+'_tmp')
                     return
-        else: 
+        else:
             try: um2netcdf4.process(file,outname+'_tmp',args)
-            except Exception as e: 
+            except Exception as e:
                 print('um2nc conversion failed: {}'.format(e))
                 os.remove(outname+'_tmp')
                 return
         os.replace(outname+'_tmp',outname)
         if plev8: do_plev8(outname)
         os.chmod(outname,0o644)
-        os.chown(outname,os.stat(outname).st_uid,arch_grp)
-        try: 
+        shutil.chown(outname,group=arch_grp)
+        try:
             if os.path.getsize(outname) < 1024:
                 print('removing empty file: ',outname)
                 os.remove(outname)
         except: pass
         sys.stdout.flush()
-    else: 
+    else:
         print(basename+': file already exists')
         if plev8: do_plev8(outname)
         sys.stdout.flush()
@@ -213,7 +215,7 @@ def do_um2nc(file,freq):
 def do_um2nc_zonal(file,freq):
     basename=os.path.basename(file)
     os.makedirs(arch_dir+'/'+loc_exp+'/history/atm/zonal/',exist_ok=True)
-    os.chown(arch_dir+'/'+loc_exp+'/history/atm/zonal/',os.stat(arch_dir+'/'+loc_exp+'/history/atm/zonal/').st_uid,arch_grp)
+    shutil.chown(arch_dir+'/'+loc_exp+'/history/atm/zonal/',group=arch_grp)
     tmpname=arch_dir+'/'+loc_exp+'/history/atm/zonal/'+basename
     for key in monmap.keys():
         if basename.find(key) != -1:
@@ -233,27 +235,27 @@ def do_um2nc_zonal(file,freq):
         sp.run(["mule-select",file,tmpname+"_nonzonal","--exclude","lbnpt=1"],capture_output=False)
         try:
             try: um2netcdf4.process(tmpname+"_zonal",outname+"_zonal_tmp",args)
-            except Exception as e: 
+            except Exception as e:
                 print('um2nc conversion failed: {}'.format(e))
                 os.remove(outname+'_zonal_tmp')
                 return
             os.replace(outname+"_zonal_tmp",outname+"_zonal")
             os.chmod(outname+"_zonal",0o644)
-            os.chown(outname+"_zonal",os.stat(outname+"_zonal").st_uid,arch_grp)
+            shutil.chown(outname+"_zonal",group=arch_grp)
         except: print('no zonal data')
         try:
             try: um2netcdf4.process(tmpname+"_nonzonal",outname+'_tmp',args)
-            except Exception as e: 
+            except Exception as e:
                 print('um2nc conversion failed: {}'.format(e))
                 os.remove(outname+'_tmp')
                 return
             os.replace(outname+'_tmp',outname)
             os.chmod(outname,0o644)
-            os.chown(outname,os.stat(outname).st_uid,arch_grp)
+            shutil.chown(outname,group=arch_grp)
         except: print('no nonzonal data')
         os.remove(tmpname+"_nonzonal")
         os.remove(tmpname+"_zonal")
-        try: 
+        try:
             if os.path.getsize(outname) < 1024:
                 print('removing empty file: ',outname)
                 os.remove(outname)
@@ -264,7 +266,7 @@ def do_um2nc_zonal(file,freq):
                 os.remove(outname+"_zonal")
         except: pass
         sys.stdout.flush()
-    else: 
+    else:
         print(basename+': file already exists')
         sys.stdout.flush()
 
@@ -309,10 +311,10 @@ def main():
     hist_atm_mon,hist_atm_dai,hist_atm_6hr,hist_atm_3hr,hist_atm_dai10,hist_atm_oth=hist_atm
     if len(hist_atm_mon)+len(hist_atm_dai)+len(hist_atm_6hr)+len(hist_atm_3hr)+len(hist_atm_dai10)+len(hist_atm_oth) > 0:
         os.makedirs(arch_dir+'/'+loc_exp+'/history/atm/netCDF',exist_ok=True)
-        os.chown(arch_dir+'/'+loc_exp+'/history/atm/netCDF',os.stat(arch_dir+'/'+loc_exp+'/history/atm/netCDF').st_uid,arch_grp)   
-    else: 
+        shutil.chown(arch_dir+'/'+loc_exp+'/history/atm/netCDF',group=arch_grp)
+    else:
         print('no atm history files found')
-    # Do um2netcdf  
+    # Do um2netcdf
     print('converting UM files to netCDF4')
     print('multiprocessor sees {} cpus'.format(ncpus))
     print('zonal processing is {}'.format(zonal))
@@ -329,7 +331,7 @@ def main():
     if len(hist_atm_dai) > 0:
         print('\nfound '+str(len(hist_atm_dai))+' daily atm files')
         if ncpus == 1:
-            for file in hist_atm_dai: 
+            for file in hist_atm_dai:
                 check_um2nc(file,'dai')
                 break
         else:
@@ -338,7 +340,7 @@ def main():
     if len(hist_atm_6hr) > 0 and subdaily:
         print('\nfound '+str(len(hist_atm_6hr))+' 6-hourly atm files')
         if ncpus == 1:
-            for file in hist_atm_6hr: 
+            for file in hist_atm_6hr:
                 check_um2nc(file,'6h')
                 break
         else:
@@ -347,7 +349,7 @@ def main():
     if len(hist_atm_3hr) > 0 and subdaily:
         print('\nfound '+str(len(hist_atm_3hr))+' 3-hourly atm files')
         if ncpus == 1:
-            for file in hist_atm_3hr: 
+            for file in hist_atm_3hr:
                 check_um2nc(file,'3h')
                 break
         else:
@@ -356,7 +358,7 @@ def main():
     if len(hist_atm_dai10) > 0:
         print('\nfound '+str(len(hist_atm_dai10))+' 10-daily atm files')
         if ncpus == 1:
-            for file in hist_atm_dai10: 
+            for file in hist_atm_dai10:
                 check_um2nc(file,'dai10')
                 break
         else:
@@ -366,7 +368,7 @@ def main():
         if convert_unknown:
             print('\nfound '+str(len(hist_atm_oth))+' unknown atm files')
             if ncpus == 1:
-                for file in hist_atm_oth: 
+                for file in hist_atm_oth:
                     check_um2nc(file,'unknown')
                     #break
             else:
