@@ -1,10 +1,5 @@
 #!/bin/bash
 
-if [ -z $base_dir ]; then
-  echo "information not provided to subroutines/find_files.sh"
-  exit
-fi
-
 echo -e "\n---- Finding Files ----"
 echo -e "finding model output files in $base_dir for $loc_exp"
 
