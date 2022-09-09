@@ -2,7 +2,7 @@
 # MOM output may include grid files without a year number. These are
 # always included.
 
-import sys, tempfile, re, os
+import sys, tempfile, re, os, shutil
 
 first_year = int(sys.argv[1])
 last_year = int(sys.argv[2])
@@ -31,4 +31,4 @@ with open(csvfile) as f_in, open(tmpfile,'w') as f_out:
         if year is None or first_year <= year <= last_year+extra:
             f_out.write(l)
 
-os.replace(tmpfile,csvfile)
+shutil.move(tmpfile,csvfile)
