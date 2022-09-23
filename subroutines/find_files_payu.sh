@@ -1,14 +1,5 @@
 #!/bin/bash
 
-if [ ! -z $1 ]; then
-  base_dir=$1
-  loc_exp=$2
-  here=$3
-else
-  echo "information not provided to subroutines/find_files_payu.sh"
-  exit
-fi
-
 echo -e "\n---- Finding Files ----"
 echo -e "finding model output files in $base_dir for $loc_exp"
 echo -e "payu-style"
