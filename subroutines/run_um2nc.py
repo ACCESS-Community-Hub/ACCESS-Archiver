@@ -324,7 +324,6 @@ def main():
         if ncpus == 1:
             for file in hist_atm_mon:
                 check_um2nc(file,'mon')
-                break
         else:
             with mp.Pool(ncpus) as pool:
                 pool.starmap(check_um2nc,((file,'mon') for file in hist_atm_mon))
@@ -333,7 +332,6 @@ def main():
         if ncpus == 1:
             for file in hist_atm_dai:
                 check_um2nc(file,'dai')
-                break
         else:
             with mp.Pool(ncpus) as pool:
                 pool.starmap(check_um2nc,((file,'dai') for file in hist_atm_dai))
@@ -342,7 +340,6 @@ def main():
         if ncpus == 1:
             for file in hist_atm_6hr:
                 check_um2nc(file,'6h')
-                break
         else:
             with mp.Pool(ncpus) as pool:
                 pool.starmap(check_um2nc,((file,'6h') for file in hist_atm_6hr))
@@ -351,7 +348,6 @@ def main():
         if ncpus == 1:
             for file in hist_atm_3hr:
                 check_um2nc(file,'3h')
-                break
         else:
             with mp.Pool(ncpus) as pool:
                 pool.starmap(check_um2nc,((file,'3h') for file in hist_atm_3hr))
@@ -360,7 +356,6 @@ def main():
         if ncpus == 1:
             for file in hist_atm_dai10:
                 check_um2nc(file,'dai10')
-                break
         else:
             with mp.Pool(ncpus) as pool:
                 pool.starmap(check_um2nc,((file,'chem') for file in hist_atm_dai10))
