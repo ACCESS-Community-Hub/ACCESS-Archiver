@@ -1,4 +1,5 @@
 #!/bin/bash
+source  /etc/profile.d/modules.sh
 module purge
 module load pbs
 set -a
@@ -28,7 +29,9 @@ convert_unknown=false
 if [ -z $arch_dir ]; then
   echo "no experiment settings"; exit
 fi
-here=$( pwd )
+if [ -z $here ]; then
+  here=$( pwd )
+fi
 mkdir -p $here/tmp/$loc_exp
 rm -f $here/tmp/$loc_exp/*
 #identify NCI project of base_dir
@@ -75,11 +78,11 @@ echo "subdaily atm data: $subdaily"
 # RUN SUBROUTINES
 
 if [[ $access_version == om2 ]]; then
-  ./subroutines/find_files_om2.sh
+  ${here}/subroutines/find_files_om2.sh
 elif [[ $access_version == esmpayu ]]; then
-  ./subroutines/find_files_payu.sh
+  ${here}/subroutines/find_files_payu.sh
 else
-  ./subroutines/find_files.sh
+  ${here}/subroutines/find_files.sh
 fi
 
 if [[ -n $first_year || -n $last_year ]]; then
