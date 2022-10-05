@@ -78,15 +78,9 @@ echo "subdaily atm data: $subdaily"
 # RUN SUBROUTINES
 
 if [[ $access_version == om2 ]]; then
-<<<<<<< HEAD
   ${here}/subroutines/find_files_om2.sh
 elif [[ $access_version == esmpayu ]]; then
   ${here}/subroutines/find_files_payu.sh
-=======
-  ./subroutines/find_files_om2.sh $base_dir $loc_exp $here
-elif [[ $access_version == esmpayu ]]; then
-  ./subroutines/find_files_payu.sh $base_dir $loc_exp $here
->>>>>>> ACCESS-Archiver-main
 else
   ${here}/subroutines/find_files.sh
 fi
